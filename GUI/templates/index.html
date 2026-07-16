@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>First GUI app with python</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" />
+    <style>
+        h1 {
+            text-align: center;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+    }
+
+    input{
+			width: 50%;
+			height: 50px;
+			margin-bottom: 30px;
+			line-height: 20px;
+			font-size: 20px;
+			text-indent: 0.7cm;
+			border-radius: 6px;
+
+		}
+         form {
+		 	margin-left: 20%;
+		 	width: 100%;
+
+		 }
+          
+   </style>
+</head>
+<body>
+   <h4 class="text-center">uu</h4>
+    <h1>Image Classifier</h1>
+
+    <form class="p-3 text-center" method="post" enctype="multipart/form-data" action="/">
+	<!-- <label>Name</label> -->
+	<input class="form-control" type="file" name="imagefile"> 
+
+	<input type="submit" class="btn btn-primary" value="Predict Image">
+</body>
+</html>

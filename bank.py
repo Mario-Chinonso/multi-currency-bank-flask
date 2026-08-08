@@ -14,7 +14,22 @@ def bank_action():
        print("Your balance is ", opening_balance)
        choice_to_continue = input("Do you want to proceed(y/n): ")
        if choice_to_continue == 'y' and opening_balance > 1000:
-         continue
+         print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
+         choice = float(input("1. Withdraw\n2. Deposit money\n"))
+         if choice == 1:
+          continue
+         elif choice == 2:
+            print("Welcome, ", user_name)
+            amount_to_deposit = float(input("Enter the amount you want to deposit: "))
+            new_opening_balance = amount_to_deposit + opening_balance
+            opening_balance = new_opening_balance
+            code_to_check_balance = "*989*7#"
+            print("Succesful Deposition!\nTo check your balance enter: ", code_to_check_balance)
+            code = input("Enter the code: ")
+            if code == code_to_check_balance:
+               print("Your balance is: ", new_opening_balance)
+
+            
        elif opening_balance == 1000:
          print("Low funds 🫙. You've reached your daily limit.")
          break
@@ -94,12 +109,16 @@ if user:
        code = input("Enter the code: ")
        if code == code_to_check_balance:
           print("Your balance is: ", new_opening_balance)
-          print("Welcome, ", user_name, ". \nBalance: ", new_opening_balance)
-          choice = float(input("1. Withdraw\n2. Deposit money\n"))
-          if choice == 1:
-             new_bank_action()
-          if choice == 2:
-             deposit_money()
+          choice_to_continue = input("Do you want to proceed(y/n): ")
+          if choice_to_continue == 'y':
+           print("Welcome, ", user_name, ". \nBalance: ", new_opening_balance)
+           choice = float(input("1. Withdraw\n2. Deposit money\n"))
+           if choice == 1:
+              new_bank_action()
+           if choice == 2:
+              deposit_money()
+          elif choice_to_continue == 'n':
+             print()
        
 
 else:

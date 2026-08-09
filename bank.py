@@ -69,36 +69,66 @@ def save_balance(username, new_balance):
       WHERE Username = ?
  """,(new_balance, username))
    connection.commit()
-       
+def change_pwd():
+   change_pwd_question = float(input("Welcome, user. To change your password, answer the following:\n1. What's your Balance: "))
+   change_pwd_question_2 = input("2. Your Username: ")
+   balance = get_balance(change_pwd_question_2)
+   
+   cursor.execute("""
+         SELECT Username
+         FROM Users
+         WHERE Balance = ?
+      """, (balance,))
+   user = cursor.fetchone()
+   user_name = user[0]
+   if change_pwd_question == balance and change_pwd_question_2 == user_name:
+      new_pwd = input("New password: ")
+      hashed = bcrypt.hashpw(
+         new_pwd.encode(),
+         bcrypt.gensalt()
+      )
+      cursor.execute("""
+            UPDATE Users
+            SET Password = ?
+            WHERE Username = ?
+      """,(hashed, user_name))
+      connection.commit()
+      print("Your password have been changed successfuly! ✅")
+   else:
+      print("Error!")
 import sqlite3 as sql
-
+import bcrypt
 connection = sql.connect("database.db")
 cursor = connection.cursor()
 
 print("Welcome, to Opay Terminal app.")
-choose = float(input("1. Log in.\n2. Register.\n"))
+choose = float(input("1. Log in.\n2. Register.\n3. Reset password\n"))
 if choose == 1:
   username = str(input("Username: "))
   password = str(input("Password: "))
   user_name = username
 
   cursor.execute("""
-      SELECT Username, Balance
+      SELECT Username, Balance, Password
       FROM Users
       WHERE Username = ?
-      AND Password = ?
+      OR Password = ?
     """, (username, password))
 
   user = cursor.fetchone()
 
   if user:
-      opening_balance = get_balance(username)
-      print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
-      choice = float(input("1. Withdraw\n2. Deposit money\n"))
-      if choice == 1:
-         bank_action()
-      if choice == 2:
-         deposit_money()
+      stored_bash = user[2]
+      if bcrypt.checkpw(password.encode(), stored_bash):
+        opening_balance = get_balance(username)
+        print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
+        choice = float(input("1. Withdraw\n2. Deposit money\n"))
+        if choice == 1:
+           bank_action()
+        if choice == 2:
+           deposit_money()
+      else:
+         print("Wrong password!")
 
   else:
      print("Error")
@@ -116,6 +146,10 @@ elif choose == 2:
           WHERE Username = ?
         """, (username,))
       existing_user = cursor.fetchone()
+      hashed = bcrypt.hashpw(
+         confirm.encode(),
+         bcrypt.gensalt()
+      )
       if existing_user:
          print("Username already exists.Please try another username")
       else:
@@ -123,7 +157,7 @@ elif choose == 2:
             INSERT INTO Users
             (Username, Password)
             VALUES(?, ?)
-          """, (username, confirm))
+          """, (username, hashed))
          connection.commit()
          code_to_continue = "#opay~yt63#"
          choice_to_continue= input("Your account has been registered.\nEnter '#opay~yt63#' to start using opay now!\nPlus 💵 20000 free, to start off with.\nEnter the code: ")
@@ -136,6 +170,8 @@ elif choose == 2:
                bank_action()
             elif choice == 2:
                deposit_money()
+elif choose == 3:
+   change_pwd()
                 
 connection.close()
       

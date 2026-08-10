@@ -1,58 +1,155 @@
+def bank_action_dollar():
+ while True:
+   opening_balance = get_balance(username)
+   dollar = 1370.37
+   amount_to_withdraw = float(input("Enter the amount: 💲"))
+   if amount_to_withdraw > opening_balance:
+      print("Insufficient fund! ⛔")
+      break
+   elif amount_to_withdraw <= opening_balance:
+      print("Successful Transaction!")
+      closing_balance = opening_balance - amount_to_withdraw * dollar
+      opening_balance = closing_balance
+      save_balance(user_name, opening_balance)
+      print("Your balance is: ", opening_balance)
+      choice_to_continue = input("Do you want to proceed(y/n): ")
+      if choice_to_continue == 'y'and opening_balance > 1000:
+          print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
+          choice = float(input("1. Withdraw\n2. Deposit\n"))
+          if choice == 1:
+             bank_action()
+             break
+          elif choice == 2:
+             deposit_money()
+             break
+          else:
+             print("Error!") 
+             break
+      elif opening_balance == 1000:
+         print("Low funds 🫙. You've reached your daily limit.")
+         break
+      elif opening_balance == 0:
+         print("Sorry, you can't continue. You've exhausted your balance.")
+         break
+      elif choice_to_continue == 'n':
+          print("Bye, ", user_name,".👋")
+          break
+      else:
+         print("Error!")
+         break
+def bank_action_yuan():
+   while True:
+      opening_balance = get_balance(username)
+      yuan = 201.7386
+      amount_to_withdraw = float(input("Enter the amount: 💴 "))
+      if amount_to_withdraw > opening_balance:
+         print("Insufficient fund! ⛔")
+         break
+      elif amount_to_withdraw <= opening_balance:
+         print("Successful Transaction!")
+         closing_balance = opening_balance - amount_to_withdraw * yuan
+         opening_balance = closing_balance
+         save_balance(user_name, opening_balance)
+         print("Your balance is: ", opening_balance)
+         choice_to_continue = input("Do you want to proceed(y/n): ")
+         if choice_to_continue == 'y' and opening_balance > 1000:
+            print("Welcome, ", user_name, "\nBalance: ", opening_balance)
+            choice = float(input("1. Withdraw\n2. Deposit\n"))
+            try:
+              if choice == 1:
+                 bank_action()
+                 break
+              elif choice == 2:
+                 deposit_money()
+                 break
+              else:
+                 print("Error!")
+                 break
+            except ValueError as error:
+               print("Error: ", error)
+         elif opening_balance == 1000:
+            print("Low funds 🫙. You've reached your daily limit.")
+            break
+         elif opening_balance == 0:
+            print("Sorry, you can't continue. You've exhausted your balance.")
+            break
+         elif choice_to_continue == 'n':
+            print("Bye, ", user_name,".👋")
+            break
+         else:
+            print("Error!")
+            break
 def bank_action():
  while True:
   opening_balance = get_balance(username)
-  amount_to_withdraw = float(input("Enter the amount you want to withdraw: "))
-  if amount_to_withdraw > opening_balance:
-         print("Insufficient fund! ⛔")
-         break
-  elif amount_to_withdraw <= opening_balance:
-       print("Successful Transaction!")
-       closing_balance = opening_balance - amount_to_withdraw
-       opening_balance = closing_balance
-       save_balance(user_name, opening_balance)
-       print("Your balance is ", opening_balance)
-       choice_to_continue = input("Do you want to proceed(y/n): ")
-       if choice_to_continue == 'y' and opening_balance > 1000:
-         print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
-         choice = float(input("1. Withdraw\n2. Deposit money\n"))
-         if choice == 1:
-          continue
-         elif choice == 2:
-           deposit_money()
-           choice_to_continue = input("Do you want to proceed(y/n): ")
-           if choice_to_continue == 'y':
-              continue
-           else:
-              break
-       elif opening_balance == 1000:
-         print("Low funds 🫙. You've reached your daily limit.")
-         break
-       elif opening_balance == 0:
-         print("Sorry, you can't continue. You've exhausted your balance.")
-         break
-       elif choice_to_continue == 'n':
-         print("Bye, ", user_name,".👋")
-         break
+  currency_to_withdraw = float(input("Please choose the currency you would like to use.\n1. US Dolar\n2. Naira\n3. Chinese Yuan\n"))
+  if currency_to_withdraw == 1:
+     bank_action_dollar()
+     break
+  elif currency_to_withdraw == 2:
+     amount_to_withdraw = float(input("Enter the amount you want to withdraw: "))
+     if amount_to_withdraw > opening_balance:
+           print("Insufficient fund! ⛔")
+           break
+     elif amount_to_withdraw <= opening_balance:
+         print("Successful Transaction!")
+         closing_balance = opening_balance - amount_to_withdraw
+         opening_balance = closing_balance
+         save_balance(user_name, opening_balance)
+         print("Your balance is ", opening_balance)
+         choice_to_continue = input("Do you want to proceed(y/n): ")
+         if choice_to_continue == 'y' and opening_balance > 1000:
+           print("Welcome, ", user_name, ". \nBalance: ", opening_balance)
+           choice = float(input("1. Withdraw\n2. Deposit money\n"))
+           if choice == 1:
+            continue
+           elif choice == 2:
+             deposit_money()
+         elif opening_balance == 1000:
+            print("Low funds 🫙. You've reached your daily limit.")
+            break
+         elif opening_balance == 0:
+           print("Sorry, you can't continue. You've exhausted your balance.")
+           break
+         elif choice_to_continue == 'n':
+            print("Bye, ", user_name,".👋")
+            break
+  elif currency_to_withdraw == 3:
+     bank_action_yuan()
+     break
+  else:
+     print("Error!")
 def deposit_money():
   opening_balance = get_balance(username)
   print("Welcome, ", user_name, "\nBalance: ", opening_balance)
-  amount_to_deposit = float(input("Enter the amount you want to deposit: "))
-  opening_balance = amount_to_deposit + opening_balance
-  save_balance(user_name, opening_balance)   
-  code_to_check_balance = "*989*7#"
-  print("Succesful Deposition!\nTo check your balance enter: ", code_to_check_balance)
-  code = input("Enter the code: ")
-  if code == code_to_check_balance:
-        print("Your balance is: ", opening_balance)
-  choice_to_continue = input("Do you want to proceed(y/n): ")
-  if choice_to_continue == 'y':
-     choice = float(input("1. Withdraw\n2. Deposit money\n"))
-     if choice == 1:
-        bank_action()
-     elif choice == 2:
-        deposit_money()
-  elif choice_to_continue == 'n':
-       print("Bye, ", user_name,".👋")
+  amount_to_deposit = float(input("Please choose a currency you would like to use.\n1. US Dollar\n2. Naira\n3. Chinese Yuan\n"))
+  if amount_to_deposit == 1:
+     deposit_dollar()
+  elif amount_to_deposit == 2:
+     amount_to_deposit = float(input("Enter the amount: "))
+     opening_balance = amount_to_deposit + opening_balance
+     save_balance(user_name, opening_balance)   
+     code_to_check_balance = "*989*7#"
+     print("Succesful Deposition!\nTo check your balance enter: ", code_to_check_balance)
+     code = input("Enter the code: ")
+     if code == code_to_check_balance:
+         print("Your balance is: ", opening_balance)
+         choice_to_continue = input("Do you want to proceed(y/n): ")
+         if choice_to_continue == 'y':
+           choice = float(input("1. Withdraw\n2. Deposit money\n"))
+           if choice == 1:
+               bank_action()
+           elif choice == 2:
+               deposit_money()
+         elif choice_to_continue == 'n':
+            print("Bye, ", user_name,".👋")
+     else:
+         print("Error!")
+  elif amount_to_deposit == 3:
+     deposit_yuan()
+  else:
+     print("Error!")
+        
 def get_balance(username):
    cursor.execute("""
       SELECT Balance
@@ -96,6 +193,63 @@ def change_pwd():
       print("Your password have been changed successfuly! ✅")
    else:
       print("Error!")
+def deposit_dollar():
+   opening_balance = get_balance(username)
+   dollar = 1370.37
+   amount_to_deposit_dollar = float(input("Enter the amount: 💲"))
+   opening_balance = amount_to_deposit_dollar * dollar + opening_balance
+   save_balance(user_name, opening_balance)
+   code_to_check_balance = "*989*7#"
+   print("Succesful Deposition!\nTo check your balance enter: ", code_to_check_balance)
+   code = input("Enter the code: ")
+   if code == code_to_check_balance:
+      print("Your balance is: ", opening_balance)
+      choice_to_continue = input("Do you want to proceed(y/n): ")
+      if choice_to_continue == 'y':
+         choice = float(input("1. Withdraw\n2. Deposit\n"))
+         if choice == 1:
+            bank_action()
+         elif choice ==2 :
+            deposit_money()
+         else:
+            print("Error!")
+      elif choice_to_continue == 'n':
+         print("Bye, ", user_name, " . 👋")
+      else:
+         print("Error!")
+def deposit_yuan():
+   opening_balance = get_balance(username)
+   yuan = 201.7386
+   amount_to_deposit_yuan = float(input("Enter the amount: 💴 "))
+   opening_balance = opening_balance + amount_to_deposit_yuan * yuan
+   save_balance(user_name, opening_balance)
+   code_to_check_balance = "*989*7#"
+   print("Succesful Deposition!\nTo check your balance enter: ", code_to_check_balance)
+   code = input("Enter the code: ")
+   if code == code_to_check_balance:
+      print("Your balance is: ", opening_balance)
+      choice_to_continue = input("Do you want to proceed(y/n): ")
+      if choice_to_continue == 'y':
+         choice = float(input("1. Withdraw\n 2. Deposit"))
+         try:
+            if choice == 1:
+               bank_action()
+            elif choice == 2:
+               deposit_money()
+            else:
+               print("Error!")
+         except ValueError as error:
+            print("Error!", error)
+      elif choice_to_continue == 'n':
+         print("Bye, ", user_name, " . 👋")
+      else:
+         print("Error!")
+
+
+
+
+
+
 import sqlite3 as sql
 import bcrypt
 connection = sql.connect("database.db")
@@ -131,7 +285,7 @@ if choose == 1:
          print("Wrong password!")
 
   else:
-     print("Error")
+     print("Error! Username not found.")
 
 elif choose == 2:
    username = input("Choose a Username: ")

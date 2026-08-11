@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>First GUI app with python</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" />
-    <style>
-        h1 {
-            text-align: center;
-            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" />
+	<title>我的网络。(My Website)</title>
+	<style>
+		.card-dark {
+      background: rgba(16, 34, 56, 0.95);
+      border: 4px solid #22354d;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+	.text-soft {
+      color: #a7b3c5;
     }
 
-    input{
-			width: 50%;
-			height: 50px;
-			margin-bottom: 30px;
-			line-height: 20px;
-			font-size: 20px;
-			text-indent: 0.7cm;
-			border-radius: 6px;
-
-		}
-         form {
-		 	margin-left: 20%;
-		 	width: 100%;
-
-		 }
-          
-   </style>
+	</style>
 </head>
-<body>
-   pip install python-dotenv
-    <p class="display-1">Image Classifier</p>
+<body class="bg-dark text-light">
+	<div class="container py-4 py-mid-5">
+	<section class="card-dark rounded-4 p-4 p-md-5 mb-4">
+      <h1 class="display-5 fw-bold mb-3 text-center">{{username_1}}，您好。</h1>
+      <p class="lead text-soft mb-3 text-center">
+        Your Balance is: <br>
+		<p class="fw-bold m-3 text-center">{{balance}} .</p>
+      </p>
+	  <p class="display-4"></p>
+	<p class="display-5 text-success"></p>
+    </section>
+	</div>
 
-    <form class="p-3 text-center" method="post" enctype="multipart/form-data" action="/">
-	<!-- <label>Name</label> -->
-	<input class="form-control" type="file" name="imagefile"> 
-
-	<input type="submit" class="btn btn-primary" value="Predict Image">
+	<p class="text-center textsoft mt-4 mb-0">©️ Maduka Chinonso | Software Developer.</p>
+	
+	<!-- <form action="/" method="post" class="form-control">
+		<label for="text" class="form-control-label">Username: </label>
+			<input required type="text" name="username" placeholder="{{username}}" class="form-control">
+		
+		<label for="pwd" class="form-control-label">Password: </label>
+		<input required type="password" name="password" id="" class="form-control" placeholder="{{balance}}">
+		<br>
+		<button class="btn btn-primary text-center">Submit</button>
+	</form> -->
 </body>
 </html>

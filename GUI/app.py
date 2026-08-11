@@ -1,137 +1,26 @@
-from flask import Flask, render_template, request
+# from flask import Flask, render_template
+# import sqlite3 as sql
 
-app = Flask(__name__)
+# connection = sql.connect("database.db")
 
+# cursor = connection.cursor()
 
-@app.route('/', methods=['GET'])
-def hello_world():
-    return render_template('index.html')
+# cursor.execute("""
+#         SELECT Username, Balance
+#         FROM Users
+#         WHERE UserID = 12
+# """)
+# user = cursor.fetchone()
 
-
-@app.route('/', methods=['POST'])
-def predict():
-    imagefile = request.files.get('imagefile')
-    if imagefile and imagefile.filename:
-        image_path = './images/' + imagefile.filename
-        imagefile.save(image_path)
-    return render_template('index.html')
-
-
-if __name__ == "__main__":
-    app.run(port=3120, debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from flask import Flask, render_template, request
 
 # app = Flask(__name__)
 
-# @app.route('/', methods=['GET'])
-# def hello_word():
-#     return render_template('index.html')
+# @app.route("/")
+# def home():
+#     return render_template(
+#         "index.html",
+#         username = user[0],
+#         balance = user[1]
+#         )
 
-
-# @app.route('/', methods=['POST'])
-# def predict():
-#     imagefile =  request.files['imagefile']
-#     image_path = "./images/" + imagefile.filename
-#     imagefile.save(image_path)
-
-
-#     return render_template('index.html')
-
-
-
-# if __name__ == "__main__":
-#     app.run(port=3000, debug=True)
+# app.run(debug=True)

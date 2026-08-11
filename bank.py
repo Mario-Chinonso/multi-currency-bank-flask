@@ -230,7 +230,7 @@ def deposit_yuan():
       print("Your balance is: ", opening_balance)
       choice_to_continue = input("Do you want to proceed(y/n): ")
       if choice_to_continue == 'y':
-         choice = float(input("1. Withdraw\n 2. Deposit"))
+         choice = float(input("1. Withdraw\n2. Deposit\n"))
          try:
             if choice == 1:
                bank_action()

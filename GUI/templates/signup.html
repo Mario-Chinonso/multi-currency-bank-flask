@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Opay Terminal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" />
+    <style>
+        body {
+            background-color: #0b1329;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .signup-card {
+            background: #101c30;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 100%;
+        }
+        .custom-input {
+            background-color: #0f172a !important;
+            border: 1px solid #334155 !important;
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="signup-card p-4 mx-3">
+        <h2 class="text-center mb-1 fw-bold">Create Account</h2>
+        <p class="text-center text-secondary small mb-4">Opay Terminal Banking</p>
+
+        {% if error %}
+        <div class="alert alert-danger py-2 fs-7 text-center">{{ error }}</div>
+        {% endif %}
+
+        <form action="{{ url_for('signup') }}" method="POST">
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Username</label>
+                <input required type="text" name="username" class="form-control custom-input" placeholder="Enter username" autofocus>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Password</label>
+                <input required type="password" name="password" class="form-control custom-input" placeholder="Enter password">
+            </div>
+
+            <!-- Initial Deposit -->
+            <div class="mb-4">
+                <label class="form-label text-secondary small fw-bold">Initial Deposit (₦)</label>
+                <input required type="number" step="0.01" min="0" name="initial_deposit" class="form-control custom-input" placeholder="e.g. 1000.00">
+            </div>
+            <!-- Age -->
+                <div class="mb-3">
+                    <label for="age" class="form-label">Age</label>
+                    <input 
+                        required 
+                        type="number" 
+                        min="18" 
+                        max="120" 
+                        name="age" 
+                        id="age"
+                        placeholder="e.g. 24" 
+                        class="form-control custom-input"
+                    >
+                </div>
+                <!-- Country -->
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input 
+                        required 
+                        type="text" 
+                        name="country" 
+                        id="country"
+                        placeholder="e.g. Nigeria" 
+                        class="form-control custom-input"
+                    >
+                </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Sign Up</button>
+
+            <div class="text-center">
+                <span class="text-secondary small">Already have an account? </span>
+                <a href="{{ url_for('login') }}" class="text-info text-decoration-none small fw-bold">Log In</a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

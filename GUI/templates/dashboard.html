@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPay Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" />
+    <style>
+        .dashboard-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #f8fafc;
+        }
+        .text-accent {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light min-vh-100 py-4">
+
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Welcome back, <span class="text-accent">{{ username_1 }}</span>! 👋</h2>
+                <p class="text-secondary mb-0">OPay Digital Banking Terminal</p>
+            </div>
+            <span class="badge bg-success fs-6 px-3 py-2">Active Account</span>
+        </div>
+
+        <!-- Main Stats Grid -->
+        <div class="row g-3 mb-4">
+            <!-- Balance Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="dashboard-card p-4 h-100">
+                    <p class="text-secondary mb-1 fw-bold text-uppercase fs-7">Available Balance</p>
+                    <h2 class="fs-2 fw-bold text-success mb-0 text-break">₦ {{ "{:,.2f}".format(balance) }}</h2>
+                </div>
+            </div>
+
+            <!-- Profile Info Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="dashboard-card p-4 h-100">
+                    <p class="text-secondary mb-1 fw-bold text-uppercase fs-7">Account Details</p>
+                    <div class="mt-2">
+                        <p class="mb-1"><strong>Country:</strong> {{ country }}</p>
+                        <p class="mb-0"><strong>Age:</strong> {{ age }} years old</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exchange Rates Card -->
+            <div class="col-md-12 col-lg-4">
+                <div class="dashboard-card p-4 h-100">
+                    <p class="text-secondary mb-1 fw-bold text-uppercase fs-7">Live Conversion Rates</p>
+                    <ul class="list-unstyled mb-0 mt-2">
+                        <li class="d-flex justify-content-between py-1 border-bottom border-secondary">
+                            <span>💲 1.00 USD</span>
+                            <span class="fw-bold text-accent">₦ 1,370.37</span>
+                        </li>
+                        <li class="d-flex justify-content-between py-1 pt-2">
+                            <span>💴 1.00 CNY</span>
+                            <span class="fw-bold text-accent">₦ 201.74</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="dashboard-card p-4">
+            <h5 class="fw-bold mb-3">Quick Actions</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{url_for('deposit')}}"><button class="btn btn-success px-4 py-2">Deposit Money</button></a>
+               <a href="{{url_for('withdraw')}}"> <button class="btn btn-outline-light px-4 py-2">Withdraw</button></a>
+                <button class="btn btn-outline-secondary px-4 py-2">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

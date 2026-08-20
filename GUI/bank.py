@@ -82,7 +82,7 @@ def bank_action_yuan():
 def bank_action():
  while True:
   opening_balance = get_balance(username)
-  currency_to_withdraw = float(input("Please choose the currency you would like to use.\n1. US Dolar\n2. Naira\n3. Chinese Yuan\n"))
+  currency_to_withdraw = float(input("Withdraw Money\nPlease choose the currency you would like to use.\n1. US Dolar\n2. Naira\n3. Chinese Yuan\n"))
   if currency_to_withdraw == 1:
      bank_action_dollar()
      break
@@ -105,6 +105,7 @@ def bank_action():
             continue
            elif choice == 2:
              deposit_money()
+             break
          elif opening_balance == 1000:
             print("Low funds 🫙. You've reached your daily limit.")
             break
@@ -122,7 +123,7 @@ def bank_action():
 def deposit_money():
   opening_balance = get_balance(username)
   print("Welcome, ", username, "\nBalance: ", opening_balance)
-  amount_to_deposit = float(input("Please choose a currency you would like to use.\n1. US Dollar\n2. Naira\n3. Chinese Yuan\n"))
+  amount_to_deposit = float(input("Deposit Money\nPlease choose a currency you would like to use.\n1. US Dollar\n2. Naira\n3. Chinese Yuan\n"))
   if amount_to_deposit == 1:
      deposit_dollar()
   elif amount_to_deposit == 2:
@@ -179,7 +180,7 @@ def change_pwd():
    user = cursor.fetchone()
    user_name = user[0]
    if change_pwd_question == balance and change_pwd_question_2 == user_name:
-      new_pwd = input("New password: ")
+      new_pwd = input("User Identified.\nEnter Your New password:\n")
       hashed = bcrypt.hashpw(
          new_pwd.encode(),
          bcrypt.gensalt()
@@ -191,6 +192,32 @@ def change_pwd():
       """,(hashed, user_name))
       connection.commit()
       print("Your password have been changed successfuly! ✅")
+   elif change_pwd_question != balance and change_pwd_question_2 == user_name:
+      print("User Identified.\nYour Balnace doesn't match with our database. \nPlease run the following commands: ⏩\n1. Run “$^*;” for 'I Don't Know My Balance?'\n2. Run “#@!*” for  'My Balance Is LARGE (> 1000000000000).'")
+      choice_to_continue = input()
+      if choice_to_continue == '$^*;':
+         print("Answer these questions: ")
+         limit_of_balance = float(input("What is the limit of your balance: ~ "))
+         balance_check = balance - limit_of_balance
+         balance_check_2 = balance + limit_of_balance
+         if limit_of_balance <= balance and balance >= balance_check:
+            new_pwd = input("User Identified.\nEnter Your New password:\n")
+            hashed = bcrypt.hashpw(
+               new_pwd.encode(),
+               bcrypt.gensalt()
+            )
+            cursor.execute("""
+                  UPDATE Users
+                  SET Password = ?
+                  WHERE Username = ?
+            """,(hashed, user_name))
+            connection.commit()
+            print("Your password have been changed successfuly! ✅")
+         elif limit_of_balance >= balance and balance <= balance_check:
+            
+            print()
+         else:
+            print("Error!")
    else:
       print("Error!")
 def deposit_dollar():
@@ -340,32 +367,47 @@ elif choose == 4:
    if user:
     stored_bash = user[2]
     if bcrypt.checkpw(password.encode(), stored_bash):
-       app = Flask(__name__)
-       @app.route("/")
-       def home():
-          return render_template(
-          "index.html",
-          username_1 = user[0],
-          balance = user[1]
-       )
-       app.run()
-       choice_to_continue = input("Do you want to proceed(y/n): ")
-       if choice_to_continue == 'y':
-          choice = float(input("1. Withdraw\n2. Deposit\n"))
-          if choice == 1:
-              bank_action()
-          elif choice == 2:
-             deposit_money()
-          else:
-             print("Error!")
-       elif choice_to_continue == 'n':
-             print("Bye, ", username, " . 👋")
+       cursor.execute("""
+         SELECT Username, Age, Country
+         FROM Users
+         JOIN User_Info
+         ON User_Info.ID = Users.UserID
+         WHERE Username = ?
+       """, (username, ))
+       get_one = cursor.fetchone()
+       if get_one:
+            app = Flask(__name__)
+            @app.route("/")
+            def home():
+               return render_template(
+               "index.html",
+                username_1 = user[0],
+                balance = user[1],
+                age = get_one[1],
+                country = get_one[2]
+                )
+            print("Press CTRL+C to quit.\n====================================")
+            app.run(port=4000) # Why does debug=True don't work?
+            print("====================================")
+            choice_to_continue = input("Do you want to proceed(y/n): ")
+            if choice_to_continue == 'y':
+              choice = float(input("1. Withdraw\n2. Deposit\n"))
+              if choice == 1:
+                 bank_action()
+              elif choice == 2:
+                 deposit_money()
+              else:
+                print("Error!")
+            elif choice_to_continue == 'n':
+               print("Bye, ", username, " . 👋")
+            else:
+              print("Error!")
        else:
-           print("Error!")
+         print("Um..")
     else:
-       print("Wrong password!")
+        print("Wrong password!")
    else:
-      print("Error!")
+      print("Error! Not found")
      
                 
 connection.close()

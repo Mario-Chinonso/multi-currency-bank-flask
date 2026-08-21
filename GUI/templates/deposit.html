@@ -27,12 +27,12 @@
             border: 1px solid #334155;
             border-radius: 12px;
         }
-        .form-control {
+        .form-control, .form-select {
             background-color: #0f172a;
             border: 1px solid #334155;
             color: #ffffff;
         }
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             background-color: #0f172a;
             border-color: #10b981;
             color: #ffffff;
@@ -65,10 +65,21 @@
 
             <!-- Deposit Form -->
             <form action="{{ url_for('deposit') }}" method="POST">
+                
+                <!-- Currency Selector -->
+                <div class="mb-3">
+                    <label for="currency" class="form-label text-secondary fw-semibold">Select Currency</label>
+                    <select name="currency" id="currency" class="form-select form-select-lg" required>
+                        <option value="NGN" selected>Naira (₦)</option>
+                        <option value="USD">US Dollar ($)</option>
+                        <option value="CNY">Chinese Yuan (¥)</option>
+                    </select>
+                </div>
+
+                <!-- Amount Input -->
                 <div class="mb-4">
                     <label for="amount" class="form-label text-secondary fw-semibold">Enter Amount to Deposit</label>
                     <div class="input-group">
-                        <span class="input-group-text">₦</span>
                         <input 
                             type="number" 
                             step="0.01" 
@@ -81,7 +92,7 @@
                             autofocus
                         >
                     </div>
-                    <div class="form-text text-secondary mt-2">Minimum deposit amount is ₦1.00</div>
+                    <div class="form-text text-secondary mt-2">Foreign currencies auto-convert to NGN balance.</div>
                 </div>
 
                 <!-- Submit Button -->

@@ -8,6 +8,13 @@ app = Flask(__name__)
 
 app.secret_key = "maduka_learning_flask_secret_key_123"
 
+# Global exchange rates
+USD_RATE = 1370.37
+CNY_RATE = 201.7386
+@app.route('/')
+def home():
+    return render_template('home.html')
+
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
     conn = sql.connect('database.db')
@@ -84,7 +91,7 @@ def dashboard():
         user_age = user_info[1]
     else:
         # Fallbacks if columns/user are missing
-        user_balance, user_country, user_age = 0.0, "N/A", 0
+        return redirect(url_for('login'))
 
     # 4. Pass the database values to the template    
     return render_template(
@@ -131,20 +138,31 @@ def deposit():
 
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session.get('username')
 
     if request.method == 'POST':
-        amount = float(request.form['amount'])
+
+        raw_amount = float(request.form.get('amount', 0))
+        currency = request.form.get('currency', 'NGN')
+        
+        # Convert to Naira
+        if currency == 'USD':
+            amount_in_naira = raw_amount * USD_RATE
+        elif currency == 'CYN':
+            amount_in_naira = raw_amount * CNY_RATE
+        else:
+            amount_in_naira = raw_amount
+        
+        # Database Update
         cur.execute("""
                 SELECT Balance
                 FROM Users
                 WHERE Username = ?
-
             """, (username, ))
         row = cur.fetchone()
         user_balance = row[0]
 
-        new_balance = user_balance + amount
+        new_balance = user_balance + amount_in_naira
 
         cur.execute("""
             UPDATE Users
@@ -176,10 +194,20 @@ def withdraw():
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    username = session['username']
+    username = session.get('username')
+    if not username:
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
-        amount = float(request.form['amount'])
+        raw_amount = float(request.form.get('amount', 0))
+        currency = request.form.get('currency', 'NGN')
+
+        if currency == 'USD':
+            amount_in_naira = raw_amount * USD_RATE
+        elif currency == 'CYN':
+            amount_in_naira = raw_amount * CNY_RATE
+        else:
+            amount_in_naira = raw_amount
 
         cur.execute("""
             SELECT Balance
@@ -188,9 +216,8 @@ def withdraw():
         """, (username, ))
         row = cur.fetchone()
         balance = row[0]
-        if amount <= balance:
-
-             new_balance = balance - amount
+        if amount_in_naira <= balance:
+             new_balance = balance - amount_in_naira
              cur.execute("""
             UPDATE Users
             SET Balance = ?
@@ -199,7 +226,7 @@ def withdraw():
              conn.commit()
              conn.close()
              return redirect(url_for('dashboard'))
-        elif amount > balance:
+        elif amount_in_naira > balance:
             return render_template(
                 'withdraw.html', 
                 balance = balance,

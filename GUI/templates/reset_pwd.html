@@ -117,7 +117,7 @@
             {% endif %}
 
             <!-- Form -->
-            <form action="{{ url_for('reset_password') }}" method="POST">
+            <form action="{{ url_for('reset_pwd') }}" method="POST">
                 
                 <!-- Current Password -->
                 <div class="mb-3">
@@ -125,7 +125,7 @@
                     <input 
                         required 
                         type="password" 
-                        name="current_password" 
+                        name="current_pwd" 
                         id="current_password"
                         placeholder="Enter your current password" 
                         class="form-control custom-input"
@@ -139,7 +139,7 @@
                     <input 
                         required 
                         type="password" 
-                        name="new_password" 
+                        name="new_pwd" 
                         id="new_password"
                         placeholder="Enter your new password" 
                         class="form-control custom-input"
@@ -152,7 +152,7 @@
                     <input 
                         required 
                         type="password" 
-                        name="confirm_password" 
+                        name="confirm_pwd" 
                         id="confirm_password"
                         placeholder="Re-enter your new password" 
                         class="form-control custom-input"

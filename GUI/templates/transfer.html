@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Funds</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .transfer-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .transfer-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .transfer-header h2 {
+            color: #1a1a1a;
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        .transfer-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .balance-badge {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .balance-badge span {
+            display: block;
+            font-size: 0.8rem;
+            color: #4f46e5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .balance-badge strong {
+            font-size: 1.4rem;
+            color: #1e1b4b;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c4b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #4338ca;
+        }
+
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.88rem;
+        }
+
+        .btn-back:hover {
+            color: #111827;
+        }
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages%}
+                 <div class="alert alert-{{category}} alert-dismissible fade show mb-3"  role="alert">
+                        {{ message }}
+                    </div>
+            {% endfor%}
+        {% endif%}
+    {% endwith %}
+    <div class="transfer-card">
+        <div class="transfer-header">
+            <h2>Transfer Funds</h2>
+            <p>Send money to another account instantly</p>
+        </div>
+
+        {% if balance is defined %}
+        <div class="balance-badge">
+            <span>Available Balance</span>
+            <strong>₦{{ "{:,.2f}".format(balance) }}</strong>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('transfer') }}" method="POST">
+            <div class="form-group">
+                <label for="account_number">Recipient Account Number</label>
+                <input 
+                    type="text" 
+                    id="account_number" 
+                    name="account_number" 
+                    class="form-control" 
+                    placeholder="10-digit account number" 
+                    pattern="[0-9]{10}" 
+                    maxlength="10"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="currency">Currency</label>
+                <select id="currency" name="currency" class="form-control">
+                    <option value="NGN">NGN - Nigerian Naira</option>
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="CNY">CNY - Chinese Yuan</option>
+                    <option value="CND">CAD - Canadian Dollar</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input 
+                    type="number" 
+                    id="amount" 
+                    name="amount" 
+                    class="form-control" 
+                    placeholder="0.00" 
+                    step="0.01" 
+                    min="1" 
+                    required>
+            </div>
+
+            <button type="submit" class="btn-submit">Confirm & Send</button>
+        </form>
+
+        <a href="{{ url_for('dashboard') }}" class="btn-back">← Back to Dashboard</a>
+    </div>
+
+</body>
+</html>

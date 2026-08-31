@@ -43,7 +43,13 @@
                 <h2 class="fw-bold mb-0">Welcome back, <span class="text-accent">{{ username_1.upper() }}</span>! 👋</h2>
                 <p class="text-secondary mb-0">OPay Digital Banking Terminal</p>
             </div>
-            <span class="badge bg-success fs-6 px-3 py-2">Active Account</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success fs-6 px-3 py-2">Active Account</span>
+                <!-- Top Nav Logout Button -->
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm px-3 py-2 fw-semibold">
+                    Logout
+                </a>
+            </div>
         </div>
 
         <!-- Main Stats Grid -->
@@ -68,6 +74,12 @@
                             <div class="currency-pill text-center">
                                 <span class="text-secondary small d-block">CNY Equivalent</span>
                                 <span class="text-break fw-bold text-light">¥ {{ "{:,.2f}".format(balance / (cny_rate if cny_rate else 201.74)) }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="currency-pill text-center">
+                                <span class="text-secondary small d-block">CND Equivalent</span>
+                                <span class="text-break fw-bold text-light">$ {{ "{:,.2f}".format(balance / (cnd_rate if cnd_rate else 963.76)) }}</span>
                             </div>
                         </div>
                     </div>
@@ -95,6 +107,10 @@
                             <span>🇺🇸 1.00 USD</span>
                             <span class="fw-bold text-accent">₦ {{ "{:,.2f}".format(usd_rate) if usd_rate else "1,370.37" }}</span>
                         </li>
+                        <li class="d-flex justify-content-between align-items-center py-2 pt-2 border-bottom border-secondary">
+                            <span>🇨🇳 1.00 CND</span>
+                            <span class="fw-bold text-accent">₦ {{ "{:,.2f}".format(cnd_rate) if cnd_rate else "963.76" }}</span>
+                        </li>
                         <li class="d-flex justify-content-between align-items-center py-2 pt-2">
                             <span>🇨🇳 1.00 CNY</span>
                             <span class="fw-bold text-accent">₦ {{ "{:,.2f}".format(cny_rate) if cny_rate else "201.74" }}</span>
@@ -114,8 +130,12 @@
                 <a href="{{ url_for('withdraw') }}" class="btn btn-outline-danger px-4 py-2 fw-semibold">
                     - Withdraw
                 </a>
-                <a href="#" class="btn btn-outline-secondary px-4 py-2 fw-semibold">
-                    Reset Password
+                <a href="{{ url_for('transfer')}}" class="btn btn-outline-info px-4 py-2 fw-semibold">
+                    Transfer
+                </a>
+                <!-- Quick Action Logout Button -->
+                <a href="{{ url_for('logout') }}" class="btn btn-danger px-4 py-2 fw-semibold">
+                    Logout
                 </a>
             </div>
         </div>

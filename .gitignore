@@ -8,3 +8,26 @@ __pycache__/
 .venv/
 env/
 venv/
+images/
+
+# Ignore SQLite Databases
+*.db
+Database/database.db
+
+# Ignore Practice & Lesson Files
+a12_lesson_plan.py
+a12_line_by_line.py
+a12.py
+AI.py
+ai2.py
+AREAS.py
+bank.py
+clean.py
+ex.py
+ex2.py
+first.py
+me.py
+new.py
+practice.py
+python_beginning.py
+surface_area.py

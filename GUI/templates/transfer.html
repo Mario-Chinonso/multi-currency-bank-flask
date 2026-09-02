@@ -53,6 +53,9 @@
             padding: 12px;
             text-align: center;
             margin-bottom: 24px;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
         }
 
         .balance-badge span {
@@ -65,8 +68,11 @@
         }
 
         .balance-badge strong {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             color: #1e1b4b;
+            display: block;
+            word-break: break-all;
+            line-height: 1.4;
         }
 
         .alert {
@@ -154,7 +160,10 @@
     </style>
 </head>
 <body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
+    
+    <div class="transfer-card">
+        <div class="transfer-header">
+            {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages%}
                  <div class="alert alert-{{category}} alert-dismissible fade show mb-3"  role="alert">
@@ -163,8 +172,6 @@
             {% endfor%}
         {% endif%}
     {% endwith %}
-    <div class="transfer-card">
-        <div class="transfer-header">
             <h2>Transfer Funds</h2>
             <p>Send money to another account instantly</p>
         </div>
@@ -172,7 +179,7 @@
         {% if balance is defined %}
         <div class="balance-badge">
             <span>Available Balance</span>
-            <strong>₦{{ "{:,.2f}".format(balance) }}</strong>
+            <strong class="text-break">₦{{ "{:,.2f}".format(balance) }}</strong>
         </div>
         {% endif %}
 

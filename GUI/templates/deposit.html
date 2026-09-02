@@ -56,7 +56,15 @@
                 <h3 class="fw-bold mb-0">Deposit Funds</h3>
                 <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">← Back</a>
             </div>
-
+            {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages%}
+                 <div class="alert alert-{{category}} alert-dismissible fade show mb-3"  role="alert">
+                        {{ message }}
+                    </div>
+            {% endfor%}
+        {% endif%}
+    {% endwith %}
             <!-- Current Balance Display -->
             <div class="balance-badge p-3 mb-4 text-center">
                 <span class="text-secondary small text-uppercase fw-bold d-block mb-1">Current Balance</span>

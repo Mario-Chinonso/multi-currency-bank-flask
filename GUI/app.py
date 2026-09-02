@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 import sqlite3 as sql
 import bcrypt
 import random
-
+import requests
 
 
 app = Flask(__name__)
@@ -106,48 +106,46 @@ def error_page():
 
 @app.route("/dashboard")
 def dashboard():
-    # 1. Check if user is loggen in
     if 'username' not in session:
         return redirect(url_for('login'))
-    # 2. Retrieve logged-in username from session
+
     username = session['username']
 
-    # 3. Query the database for this specific user's info
     conn = sql.connect('database.db')
     cur = conn.cursor()
 
-
+    # Fixed Query: Uses LEFT JOINs so balance always fetches even if Account_Number is missing
     cur.execute("""
-        SELECT Username, Age, Country, Balance
+        SELECT Users.Username, User_Info.Age, User_Info.Country, Users.Balance, Account_Number.Number
         FROM Users
-        JOIN User_Info
-        ON User_Info.ID = Users.UserID
-        WHERE Username = ?
-        """, (username,))
-    user_info = cur.fetchone()
-    conn.close()
-    if user_info:
-        user_balance = user_info[3]
-        user_country = user_info[2]
-        user_age = user_info[1]
-    else:
-        # Fallbacks if columns/user are missing
-        flash('You do not have an account', 'danger')
-        return redirect(url_for('login'))
+        LEFT JOIN User_Info ON User_Info.ID = Users.UserID
+        LEFT JOIN Account_Number ON Account_Number.UserID = Users.UserID
+        WHERE Users.Username = ?
+    """, (username,))
     
+    user_data = cur.fetchone()
+    conn.close()
 
-    # 4. Pass the database values to the template    
+    if user_data:
+        user_balance = user_data[3] if user_data[3] is not None else 0.0
+        user_age = user_data[1] if user_data[1] else "N/A"
+        user_country = user_data[2] if user_data[2] else "N/A"
+        user_acc_no = user_data[4] if user_data[4] else "Not Assigned"
+    else:
+        flash('User account not found', 'danger')
+        return redirect(url_for('login'))
+
     return render_template(
         'dashboard.html',
-        balance = user_balance,
-        username_1 = username,
-        age = user_age,
-        country = user_country,
-        usd_rate = USD_RATE,
-        cny_rate = CNY_RATE,
-        cnd_rate = CND_RATE
-                        )
-
+        balance=user_balance,
+        username_1=username,
+        age=user_age,
+        country=user_country,
+        usd_rate=USD_RATE,
+        cny_rate=CNY_RATE,
+        cnd_rate=CND_RATE,
+        acc_no=user_acc_no
+    )
 @app.route("/login", methods= ['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -180,7 +178,6 @@ def login():
 @app.route('/deposit', methods = ['GET', 'POST'])
 def deposit():
     conn = sql.connect('database.db')
-
     cur = conn.cursor()
 
     if 'username' not in session:
@@ -188,6 +185,9 @@ def deposit():
     username = session.get('username')
 
     if request.method == 'POST':
+        print("\n=================== DEPOSIT DEBUG ===================")
+        print(f"[1] Logged-in Username in Session: '{username}'")
+        print(f"[2] Raw Form Data Received: {request.form}")
         raw_amount = float(request.form.get('amount', 0))
         currency = request.form.get('currency', 'NGN')
         
@@ -200,31 +200,29 @@ def deposit():
             amount_in_naira = raw_amount * CND_RATE
         else:
             amount_in_naira = raw_amount
-        
+        conn = sql.connect('database.db')
+        cur = conn.cursor()
         # Database Update
-        cur.execute("""
-                SELECT Balance
-                FROM Users
-                WHERE Username = ?
-            """, (username, ))
-        row = cur.fetchone()
-        user_balance = row[0]
-
-        new_balance = user_balance + amount_in_naira
-
-        cur.execute("""
-            UPDATE Users
-            SET Balance = ?
-            WHERE Username = ?
-        """, (new_balance, username))
-        conn.commit()
-        conn.close()
+        try:
+            cur.execute(
+                'UPDATE Users SET Balance = Balance + ? WHERE Username = ?',
+                (amount_in_naira, username)
+            )
+            conn.commit()
+            flash('Deposit successful!', 'success')
+        except Exception as e:
+            conn.rollback()
+            flash(f'Deposit failed! {str(e)}', 'error')
+        finally:
+            conn.close()
         return redirect(url_for('dashboard'))
+        
+    conn = sql.connect('database.db')
+    cur = conn.cursor()
     cur.execute("""
             SELECT Balance
             FROM Users
             WHERE Username = ?
-
             """, (username, ))
     row = cur.fetchone()
     user_balance = row[0]
@@ -248,7 +246,7 @@ def withdraw():
 
     if request.method == 'POST':
         raw_amount = float(request.form.get('amount', 0))
-        currency = request.form.get('currency', 'NGN')
+        currency = request.form.get('currency')
 
         if currency == 'USD':
             amount_in_naira = raw_amount * USD_RATE
@@ -258,42 +256,44 @@ def withdraw():
             amount_in_naira = raw_amount * CND_RATE
         else:
             amount_in_naira = raw_amount
-
-        cur.execute("""
-            SELECT Balance
-            FROM Users
-            WHERE Username = ?
-        """, (username, ))
+        conn = sql.connect('database.db')
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT Balance FROM Users WHERE Username = ?',
+            (username, )
+        )
         row = cur.fetchone()
-        balance = row[0]
-        if amount_in_naira <= balance:
-             new_balance = balance - amount_in_naira
-             cur.execute("""
-                 UPDATE Users
-                 SET Balance = ?
-                 WHERE Username = ?
-            """, (new_balance, username))
-             conn.commit()
-             conn.close()
-             return redirect(url_for('dashboard'))
-        elif amount_in_naira > balance:
-            return render_template(
-                'withdraw.html', 
-                balance = balance,
-                error = 'Insuficient Funds!'
-                                   )
-        else:
-            return redirect(url_for('dashboard'))
-
-    cur.execute("""
-        SELECT Balance
-        FROM Users
-        WHERE Username = ?
-        """, (username, ))
-    row = cur.fetchone()
-    user_balance = row[0]
+        if row:
+            balance = row[0]
+            if amount_in_naira <= balance:
+                try:
+                    cur.execute(
+                        'UPDATE Users SET Balance = Balance - ? WHERE Username = ?',
+                        (amount_in_naira, username)
+                    )
+                    conn.commit()
+                    flash('Withdrawal successful!', 'success')
+                    conn.close()
+                    return redirect(url_for('withdraw'))
+                except Exception as e:
+                    conn.rollback()
+                    conn.close()
+                    flash(f'Withdrawal failed! {str(e)}', 'error')
+                    
+                finally:
+                    conn.close()
+                return redirect(url_for('dashboard'))
+            else:
+                conn.close()
+                return render_template('withdraw.html', error='Insufficient funds', balance=balance)
     conn.close()
-    return render_template('withdraw.html', balance = user_balance)
+    conn = sql.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT Balance FROM Users WHERE Username = ?", (username,))
+    row = cur.fetchone()
+    conn.close()
+    user_balance = row[0] if row else 0.0
+    return render_template('withdraw.html', balance=user_balance)
 
 @app.route('/reset_pwd', methods = ['GET', 'POST'])
 def reset_pwd():
@@ -375,24 +375,29 @@ def transfer():
     conn = sql.connect('database.db')
     cur = conn.cursor()
     cur.execute(
-        'SELECT Users.Balance, Account_Number.Number FROM Users JOIN Account_Number ON Account_Number.Number = Users.UserID WHERE Users.UserID = ? AND Users.Username = ?',
+        'SELECT Users.Balance, Account_Number.Number, Users.Username FROM Users JOIN Account_Number ON Account_Number.UserID = Users.UserID WHERE Users.UserID = ? AND Users.Username = ?',
         (user_id, username)
     )
-    balance = cur.fetchone()[0]
-    sender_username = cur.fetchone()[1]
+    operator_info = cur.fetchone()
+    operator_balance = operator_info[0]
+    operator_acc_no = operator_info[1]
     if request.method == 'POST':
         conn = sql.connect('database.db')
         cur = conn.cursor()
         acc_no = request.form.get('account_number')
         currency = request.form.get('currency')
         raw_amount = float(request.form.get('amount'))
-
         cur.execute(
-            'SELECT Users.UserID, Users.Balance, Account_Number.Number FROM Users JOIN Account_Number' \
-            'ON Account_Number.Number = Users.UserID WHERE Account_Number.Number = ?',
+            '''
+            SELECT Users.UserID, Users.Balance, Account_Number.Number, Users.Username FROM Users JOIN Account_Number
+            ON Account_Number.UserID = Users.UserID WHERE Account_Number.Number = ?
+            ''',
             (acc_no, )
         )
         info = cur.fetchone()
+        target_user_balance = info[1]
+        database_acc_no_of_target_user = info[2]
+        target_username = info[3]
         if info:
             if currency == 'USD':
                 new_amount = raw_amount * USD_RATE
@@ -402,9 +407,48 @@ def transfer():
                 new_amount = raw_amount * CNY_RATE
             else:
                 new_amount = raw_amount
-            
+            if operator_acc_no == acc_no:
+                flash('You cannot transfer funds to your own account.', 'danger')
+                return redirect(url_for('transfer'))
+            if not info:
+                return render_template('transfer.html', error='Target account not found.', balance = operator_balance)
+            if database_acc_no_of_target_user != acc_no:
+                error = 'Warning account details'
+                return render_template('transfer.html', error = error, balance = operator_balance)
+            if new_amount > operator_balance:
+                conn.close()
+                error = 'Insufficient Funds'
+                return render_template('transfer.html', error = error, balance = operator_balance)
+            elif new_amount <= operator_balance:
+                target_user_acc_no = info[2]
+                target_user_id = info[0]
+                try:
+                    new_operator_balance = operator_balance - new_amount
+                    new_target_user_balance = target_user_balance + new_amount
 
-    return render_template('transfer.html', balance = balance)
+                    # Debit the sender
+                    cur.execute(
+                        'UPDATE Users SET Balance = ? WHERE UserID = ? AND Username = ?',
+                        (new_operator_balance, user_id, username)
+                    )
+
+                    # Credit the reciever
+                    cur.execute(
+                        'UPDATE Users SET Balance = ? WHERE UserID = ? AND Username = ?',
+                        (new_target_user_balance, target_user_id, target_username)
+                    )
+                    conn.commit()
+                    flash(f'✓ Succesfully Transfered {currency} {new_amount} to {target_username}.Account details: {target_user_acc_no}', 'success')
+                    return redirect(url_for('transfer'))
+                except Exception as e:
+                    conn.rollback()
+                    flash('Transaction error occurred. No funds were deducted.', 'danger')
+                    return redirect(url_for('transfer'))
+                finally:
+                    conn.close()
+
+
+    return render_template('transfer.html', balance = operator_balance)
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)

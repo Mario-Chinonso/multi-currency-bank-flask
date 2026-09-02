@@ -67,19 +67,19 @@
                         <div class="col-6">
                             <div class="currency-pill text-center">
                                 <span class="text-secondary small d-block">USD Equivalent</span>
-                                <span class="text-break fw-bold text-light">$ {{ "{:,.2f}".format(balance / (usd_rate if usd_rate else 1370.37)) }}</span>
+                                <span class="text-break fw-bold text-light">$ {{ "{:,.2f}".format(balance / usd_rate) }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="currency-pill text-center">
                                 <span class="text-secondary small d-block">CNY Equivalent</span>
-                                <span class="text-break fw-bold text-light">¥ {{ "{:,.2f}".format(balance / (cny_rate if cny_rate else 201.74)) }}</span>
+                                <span class="text-break fw-bold text-light">¥ {{ "{:,.2f}".format(balance / cny_rate) }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="currency-pill text-center">
                                 <span class="text-secondary small d-block">CND Equivalent</span>
-                                <span class="text-break fw-bold text-light">$ {{ "{:,.2f}".format(balance / (cnd_rate if cnd_rate else 963.76)) }}</span>
+                                <span class="text-break fw-bold text-light">$ {{ "{:,.2f}".format(balance / cnd_rate) }}</span>
                             </div>
                         </div>
                     </div>
@@ -94,6 +94,7 @@
                         <p class="mb-2"><strong>Account Name:</strong> <span class="text-light">{{ username_1 }}</span></p>
                         <p class="mb-2"><strong>Country:</strong> <span class="text-light">{{ country }}</span></p>
                         <p class="mb-0"><strong>Age:</strong> <span class="text-light">{{ age }} years old</span></p>
+                        <p class="mb-0"><strong>Account Number:</strong> <span class="text-light">{{ acc_no }}</span></p>
                     </div>
                 </div>
             </div>

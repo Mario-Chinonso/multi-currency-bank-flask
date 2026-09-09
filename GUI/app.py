@@ -66,6 +66,9 @@ def signup():
         age = int(request.form['age'])
         country = request.form['country']
         free_initial_deposit = initial_deposit + 20000
+        if age <= 17:
+            flash('Age is restricted!', 'danger')
+            return redirect(url_for('signup.html'))
         
         hashed = bcrypt.hashpw(
             password.encode(),
@@ -88,6 +91,11 @@ def signup():
             """, (username, hashed, free_initial_deposit))
             # 2. Get the generated UserID
             new_user_id = cur.lastrowid
+            cur.execute('''
+                    INSERT INTO Account_Number(UserID, Number)
+                    VALUES (?, ?)
+                ''', (new_user_id, generate_account_number(conn)))
+            
             # 3. Second Insert: User_Info table using the Foreign Key
             cur.execute("""
                 INSERT INTO User_Info(ID, Age, Country)
@@ -232,44 +240,43 @@ def deposit():
 
 @app.route('/withdraw', methods = ['GET', 'POST'])
 def withdraw():
-    conn = sql.connect('database.db')
-
-    cur = conn.cursor()
-
 
     if 'username' not in session: # What does this line mean using IT terminologies
         return redirect(url_for('login'))
 
     username = session.get('username')
+    user_id = session.get('user_id')
     if not username:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        raw_amount = float(request.form.get('amount', 0))
+        amount = float(request.form.get('amount', 0))
         currency = request.form.get('currency')
 
         if currency == 'USD':
-            amount_in_naira = raw_amount * USD_RATE
+            amount_in_naira = amount * USD_RATE
         elif currency == 'CNY':
-            amount_in_naira = raw_amount * CNY_RATE
+            amount_in_naira = amount * CNY_RATE
         elif currency == 'CND':
-            amount_in_naira = raw_amount * CND_RATE
-        else:
-            amount_in_naira = raw_amount
+            amount_in_naira = amount * CND_RATE
+        elif currency == 'NGN':
+            amount_in_naira = amount
         conn = sql.connect('database.db')
         cur = conn.cursor()
         cur.execute(
-            'SELECT Balance FROM Users WHERE Username = ?',
-            (username, )
+            'SELECT Balance FROM Users WHERE Username = ? AND UserID = ?',
+            (username, user_id)
         )
         row = cur.fetchone()
         if row:
             balance = row[0]
+            print(balance)
             if amount_in_naira <= balance:
+                new_balance = balance - amount_in_naira
                 try:
                     cur.execute(
-                        'UPDATE Users SET Balance = Balance - ? WHERE Username = ?',
-                        (amount_in_naira, username)
+                        'UPDATE Users SET Balance = ? WHERE Username = ? AND UserID = ?',
+                        (new_balance, username, user_id)
                     )
                     conn.commit()
                     flash('Withdrawal successful!', 'success')
@@ -286,13 +293,15 @@ def withdraw():
             else:
                 conn.close()
                 return render_template('withdraw.html', error='Insufficient funds', balance=balance)
-    conn.close()
+        else:
+            flash('Failed!', 'danger')
+            return render_template('withdraw.html')
     conn = sql.connect('database.db')
     cur = conn.cursor()
     cur.execute("SELECT Balance FROM Users WHERE Username = ?", (username,))
     row = cur.fetchone()
-    conn.close()
     user_balance = row[0] if row else 0.0
+    conn.close()
     return render_template('withdraw.html', balance=user_balance)
 
 @app.route('/reset_pwd', methods = ['GET', 'POST'])
@@ -389,29 +398,31 @@ def transfer():
         raw_amount = float(request.form.get('amount'))
         cur.execute(
             '''
-            SELECT Users.UserID, Users.Balance, Account_Number.Number, Users.Username FROM Users JOIN Account_Number
-            ON Account_Number.UserID = Users.UserID WHERE Account_Number.Number = ?
+            SELECT Users.UserID, Users.Balance, Account_Number.Number, Users.Username 
+            FROM Users 
+            JOIN Account_Number
+            ON Account_Number.UserID = Users.UserID 
+            WHERE Account_Number.Number = ?
             ''',
             (acc_no, )
         )
         info = cur.fetchone()
-        target_user_balance = info[1]
-        database_acc_no_of_target_user = info[2]
-        target_username = info[3]
+        
         if info:
+            target_user_balance = info[1]
+            database_acc_no_of_target_user = info[2]
+            target_username = info[3]
             if currency == 'USD':
                 new_amount = raw_amount * USD_RATE
             elif currency == 'CND':
                 new_amount = raw_amount * CND_RATE
             elif currency == 'CNY':
                 new_amount = raw_amount * CNY_RATE
-            else:
+            elif currency == 'NGN':
                 new_amount = raw_amount
             if operator_acc_no == acc_no:
                 flash('You cannot transfer funds to your own account.', 'danger')
                 return redirect(url_for('transfer'))
-            if not info:
-                return render_template('transfer.html', error='Target account not found.', balance = operator_balance)
             if database_acc_no_of_target_user != acc_no:
                 error = 'Warning account details'
                 return render_template('transfer.html', error = error, balance = operator_balance)
@@ -446,10 +457,12 @@ def transfer():
                     return redirect(url_for('transfer'))
                 finally:
                     conn.close()
+        else:
+            return render_template('transfer.html', error='Target account not found.', balance = operator_balance)
 
 
     return render_template('transfer.html', balance = operator_balance)
 
 if __name__ == '__main__':
-    app.run(port=3000, debug=True)
+    app.run(port=3000, debug=False)
 
